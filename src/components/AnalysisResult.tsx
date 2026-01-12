@@ -137,7 +137,7 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="glass-card h-full">
+    <Card className="glass-card">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
