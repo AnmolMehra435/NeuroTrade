@@ -9,8 +9,8 @@ import { ComparisonResult, type ComparisonData, type StockData } from "@/compone
 import { fetchStockPrice, fetchMultipleStockPrices } from "@/lib/stockApi";
 import { analyzeStock, compareStocks } from "@/lib/analysisApi";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, Sparkles } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Sparkles, TrendingUp, BarChart3, Shield, Zap, Target } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
   const [mode, setMode] = useState("single");
@@ -33,7 +33,6 @@ const Index = () => {
     try {
       let price = data.price;
 
-      // Try to fetch price if not provided manually
       if (price === null) {
         try {
           const quote = await fetchStockPrice(data.symbol);
@@ -50,7 +49,6 @@ const Index = () => {
         }
       }
 
-      // Get AI analysis
       const result = await analyzeStock(data.symbol, price, data.timeframe, data.riskProfile);
       setAnalysisResult(result);
 
@@ -74,7 +72,6 @@ const Index = () => {
     setComparisonResult(null);
 
     try {
-      // Fetch all prices
       const { success, failed } = await fetchMultipleStockPrices(symbols);
 
       if (success.length === 0) {
@@ -99,7 +96,6 @@ const Index = () => {
         price: q.price,
       }));
 
-      // Get AI comparison
       const result = await compareStocks(stocks);
       setComparisonResult(result);
 
@@ -123,44 +119,123 @@ const Index = () => {
     setPriceError(null);
   };
 
+  const features = [
+    {
+      icon: TrendingUp,
+      title: "Real-Time Data",
+      description: "Live market prices from Alpha Vantage"
+    },
+    {
+      icon: Sparkles,
+      title: "AI Analysis",
+      description: "Powered by Google Gemini AI"
+    },
+    {
+      icon: BarChart3,
+      title: "Technical Indicators",
+      description: "RSI, MACD, Moving Averages & more"
+    },
+    {
+      icon: Shield,
+      title: "Risk Assessment",
+      description: "Volatility analysis & position sizing"
+    },
+    {
+      icon: Zap,
+      title: "Smart Money Concepts",
+      description: "Order blocks & liquidity zones"
+    },
+    {
+      icon: Target,
+      title: "Entry/Exit Strategy",
+      description: "Precise trade setups with targets"
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
 
-      <main className="container mx-auto px-4 py-6">
-        {/* AI Powered Notice */}
-        <Alert className="mb-6 border-accent/30 bg-accent/5">
-          <Sparkles className="h-4 w-4 text-accent" />
-          <AlertTitle>AI-Powered Analysis</AlertTitle>
-          <AlertDescription>
-            Powered by Google Gemini AI with real-time Alpha Vantage market data. Enter a stock symbol to get started.
-          </AlertDescription>
-        </Alert>
+      <main className="flex-1 container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+            AI-Powered Stock Intelligence
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Get professional-grade technical analysis, smart money concepts, and actionable trading strategies powered by Google Gemini AI.
+          </p>
+        </div>
 
-        {/* Mode Selector */}
-        <div className="mb-6">
+        {/* Feature Cards - Full Width */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+          {features.map((feature, index) => (
+            <Card key={index} className="glass-card border-border/50 hover:border-primary/30 transition-colors">
+              <CardContent className="p-4 text-center">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <feature.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-medium text-sm mb-1">{feature.title}</h3>
+                <p className="text-xs text-muted-foreground">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Mode Selector - Centered */}
+        <div className="max-w-xl mx-auto mb-8">
           <ModeSelector mode={mode} onModeChange={handleModeChange} />
         </div>
 
-        {/* Main Content - Two Column Grid */}
-        <div className="grid lg:grid-cols-2 gap-6">
+        {/* Main Content - Two Column Layout */}
+        <div className="grid lg:grid-cols-2 gap-8 min-h-[600px]">
           {/* Left Column - Input Forms */}
           <div className="space-y-6">
-            {mode === "single" && (
-              <SingleStockForm
-                onAnalyze={handleSingleAnalysis}
-                isLoading={isLoading}
-                priceError={priceError}
-              />
-            )}
-            {mode === "multi" && (
-              <MultiStockForm onCompare={handleMultiComparison} isLoading={isLoading} />
-            )}
-            {mode === "image" && <ImageAnalysisPlaceholder />}
+            <div className="sticky top-24">
+              {mode === "single" && (
+                <SingleStockForm
+                  onAnalyze={handleSingleAnalysis}
+                  isLoading={isLoading}
+                  priceError={priceError}
+                />
+              )}
+              {mode === "multi" && (
+                <MultiStockForm onCompare={handleMultiComparison} isLoading={isLoading} />
+              )}
+              {mode === "image" && <ImageAnalysisPlaceholder />}
+
+              {/* Quick Tips Card */}
+              <Card className="mt-6 bg-accent/5 border-accent/20">
+                <CardContent className="p-5">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-accent" />
+                    Quick Tips
+                  </h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      Use stock tickers like AAPL, TSLA, MSFT for US stocks
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      Choose your timeframe based on your trading style
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      Risk profile affects stop-loss and position sizing
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      Compare up to 5 stocks for optimal portfolio allocation
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Right Column - Results */}
-          <div>
+          <div className="min-h-[500px]">
             {mode === "single" && (
               <AnalysisResult data={analysisResult} isLoading={isLoading} />
             )}
@@ -168,19 +243,45 @@ const Index = () => {
               <ComparisonResult data={comparisonResult} isLoading={isLoading} />
             )}
             {mode === "image" && (
-              <div className="glass-card rounded-lg p-8 text-center">
-                <p className="text-muted-foreground">
-                  Chart analysis results will appear here when the feature launches.
-                </p>
-              </div>
+              <Card className="glass-card h-full min-h-[500px] flex items-center justify-center">
+                <CardContent className="text-center py-16">
+                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground mb-2">
+                    Chart analysis results will appear here
+                  </p>
+                  <p className="text-sm text-muted-foreground/70">
+                    Upload a candlestick chart image when the feature launches
+                  </p>
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>
 
         {/* Footer */}
-        <footer className="mt-12 py-6 border-t border-border text-center text-sm text-muted-foreground">
-          <p>NeuroTrade — AI-Powered Stock Intelligence Platform</p>
-          <p className="mt-1">For educational purposes only. Not financial advice.</p>
+        <footer className="mt-16 py-8 border-t border-border">
+          <div className="grid md:grid-cols-3 gap-8 text-center md:text-left">
+            <div>
+              <h4 className="font-semibold mb-2">NeuroTrade</h4>
+              <p className="text-sm text-muted-foreground">
+                AI-Powered Stock Intelligence Platform for modern traders.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Powered By</h4>
+              <p className="text-sm text-muted-foreground">
+                Google Gemini AI • Alpha Vantage API • Lovable Cloud
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Disclaimer</h4>
+              <p className="text-sm text-muted-foreground">
+                For educational purposes only. Not financial advice.
+              </p>
+            </div>
+          </div>
         </footer>
       </main>
     </div>
