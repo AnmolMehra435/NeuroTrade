@@ -122,6 +122,16 @@ const Index = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
+        {/* Hero Description */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold tracking-tight mb-3">
+            AI-Powered Stock Analysis
+          </h1>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Get instant technical analysis, chart pattern recognition, and actionable trading signals powered by advanced AI models.
+          </p>
+        </div>
+
         {/* Mode Selector */}
         <div className="max-w-md mx-auto mb-8">
           <ModeSelector mode={mode} onModeChange={handleModeChange} />
