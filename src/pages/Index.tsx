@@ -7,9 +7,9 @@ import { ImageAnalysisPlaceholder } from "@/components/ImageAnalysisPlaceholder"
 import { AnalysisResult, type AnalysisData } from "@/components/AnalysisResult";
 import { ComparisonResult, type ComparisonData, type StockData } from "@/components/ComparisonResult";
 import { fetchStockPrice, fetchMultipleStockPrices } from "@/lib/stockApi";
-import { generateMockAnalysis, generateMockComparison } from "@/lib/mockAnalysis";
+import { analyzeStock, compareStocks } from "@/lib/analysisApi";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Index = () => {
@@ -38,6 +38,10 @@ const Index = () => {
         try {
           const quote = await fetchStockPrice(data.symbol);
           price = quote.price;
+          toast({
+            title: "Price fetched",
+            description: `${data.symbol}: $${price.toFixed(2)}`,
+          });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : "Failed to fetch price";
           setPriceError(errorMessage);
@@ -46,13 +50,13 @@ const Index = () => {
         }
       }
 
-      // Generate analysis (mock for now - will use Gemini via edge function)
-      const result = generateMockAnalysis(data.symbol, price, data.timeframe, data.riskProfile);
+      // Get AI analysis
+      const result = await analyzeStock(data.symbol, price, data.timeframe, data.riskProfile);
       setAnalysisResult(result);
 
       toast({
         title: "Analysis Complete",
-        description: `${data.symbol} analyzed successfully`,
+        description: `${data.symbol}: ${result.signal} (${result.confidence}% confidence)`,
       });
     } catch (error) {
       toast({
@@ -70,6 +74,7 @@ const Index = () => {
     setComparisonResult(null);
 
     try {
+      // Fetch all prices
       const { success, failed } = await fetchMultipleStockPrices(symbols);
 
       if (success.length === 0) {
@@ -94,13 +99,13 @@ const Index = () => {
         price: q.price,
       }));
 
-      // Generate comparison (mock for now)
-      const result = generateMockComparison(stocks);
+      // Get AI comparison
+      const result = await compareStocks(stocks);
       setComparisonResult(result);
 
       toast({
         title: "Comparison Complete",
-        description: `${stocks.length} stocks analyzed`,
+        description: `${stocks.length} stocks ranked by AI`,
       });
     } catch (error) {
       toast({
@@ -123,12 +128,12 @@ const Index = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6">
-        {/* API Notice */}
-        <Alert className="mb-6 border-primary/30 bg-primary/5">
-          <AlertCircle className="h-4 w-4 text-primary" />
-          <AlertTitle>Demo Mode</AlertTitle>
+        {/* AI Powered Notice */}
+        <Alert className="mb-6 border-accent/30 bg-accent/5">
+          <Sparkles className="h-4 w-4 text-accent" />
+          <AlertTitle>AI-Powered Analysis</AlertTitle>
           <AlertDescription>
-            Using Alpha Vantage demo API (limited requests). For full functionality, connect your API keys via the backend.
+            Powered by Google Gemini AI with real-time Alpha Vantage market data. Enter a stock symbol to get started.
           </AlertDescription>
         </Alert>
 
