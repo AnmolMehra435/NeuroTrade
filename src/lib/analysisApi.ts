@@ -49,7 +49,14 @@ export async function analyzeStock(
     price,
     signal,
     confidence,
-    analysis: data.analysis || "Analysis unavailable.",
+    summary: data.summary || undefined,
+    analysis: data.analysis || undefined,
+    technicalAnalysis: data.technicalAnalysis || undefined,
+    chartPatterns: data.chartPatterns || undefined,
+    smartMoneyConcepts: data.smartMoneyConcepts || undefined,
+    trendAnalysis: data.trendAnalysis || undefined,
+    strategy: data.strategy || undefined,
+    riskAssessment: data.riskAssessment || undefined,
     timeframe: timeframeText,
     riskProfile: riskText,
   };
@@ -68,16 +75,22 @@ export async function compareStocks(stocks: StockData[]): Promise<ComparisonData
     throw new Error("Failed to compare stocks. Please try again.");
   }
 
-  // Ensure rankings are properly formatted
+  // Ensure rankings are properly formatted with new fields
   const rankings = (data.rankings || []).map((r: any, index: number) => ({
     rank: r.rank || index + 1,
     symbol: r.symbol || "Unknown",
+    signal: r.signal || "HOLD",
+    confidence: r.confidence || 50,
+    strength: r.strength || "MODERATE",
+    volatility: r.volatility || "MEDIUM",
     recommendation: r.recommendation || "No recommendation",
   }));
 
   return {
     stocks,
     rankings,
+    topPick: data.topPick || undefined,
+    comparativeAnalysis: data.comparativeAnalysis || undefined,
     analysis: data.analysis || "Comparison unavailable.",
   };
 }
