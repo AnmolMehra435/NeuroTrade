@@ -1,60 +1,43 @@
-const ALPHA_VANTAGE_API_KEY = "demo"; // Replace with actual key via secrets
+import { supabase } from "@/integrations/supabase/client";
 
 export interface StockQuote {
   symbol: string;
   price: number;
-  change: number;
-  changePercent: number;
+  change?: number;
+  changePercent?: number;
 }
 
 export async function fetchStockPrice(symbol: string): Promise<StockQuote> {
-  const response = await fetch(
-    `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
-  );
+  const { data, error } = await supabase.functions.invoke('fetch-stock-price', {
+    body: { symbols: [symbol] },
+  });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch stock data");
+  if (error) {
+    console.error("Error fetching stock price:", error);
+    throw new Error("Failed to fetch stock data. Please enter price manually.");
   }
 
-  const data = await response.json();
-
-  // Check for rate limit or error
-  if (data["Note"] || data["Information"]) {
-    throw new Error("API rate limit reached. Please enter price manually.");
+  if (!data.success || data.success.length === 0) {
+    throw new Error(`No data found for ${symbol}. API rate limit may be reached.`);
   }
 
-  const quote = data["Global Quote"];
-  if (!quote || !quote["05. price"]) {
-    throw new Error(`No data found for symbol: ${symbol}`);
-  }
-
-  return {
-    symbol: quote["01. symbol"],
-    price: parseFloat(quote["05. price"]),
-    change: parseFloat(quote["09. change"]),
-    changePercent: parseFloat(quote["10. change percent"]?.replace("%", "") || "0"),
-  };
+  return data.success[0];
 }
 
 export async function fetchMultipleStockPrices(
   symbols: string[]
 ): Promise<{ success: StockQuote[]; failed: string[] }> {
-  const results: StockQuote[] = [];
-  const failed: string[] = [];
+  const { data, error } = await supabase.functions.invoke('fetch-stock-price', {
+    body: { symbols },
+  });
 
-  // Fetch sequentially to avoid rate limits
-  for (const symbol of symbols) {
-    try {
-      // Add delay between requests to avoid rate limiting
-      if (results.length > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-      }
-      const quote = await fetchStockPrice(symbol);
-      results.push(quote);
-    } catch (error) {
-      failed.push(symbol);
-    }
+  if (error) {
+    console.error("Error fetching stock prices:", error);
+    return { success: [], failed: symbols };
   }
 
-  return { success: results, failed };
+  return {
+    success: data.success || [],
+    failed: data.failed || [],
+  };
 }
