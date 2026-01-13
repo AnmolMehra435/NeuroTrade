@@ -133,12 +133,12 @@ const Index = () => {
         </div>
 
         {/* Mode Selector */}
-        <div className="max-w-md mx-auto mb-8">
+        <div className="max-w-2xl mx-auto mb-8">
           <ModeSelector mode={mode} onModeChange={handleModeChange} />
         </div>
 
         {/* Input Form - Centered */}
-        <div className="max-w-md mx-auto mb-8">
+        <div className="max-w-2xl mx-auto mb-8">
           {mode === "single" && (
             <SingleStockForm
               onAnalyze={handleSingleAnalysis}
